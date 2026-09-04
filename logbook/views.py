@@ -18,6 +18,7 @@ import string
 import csv
 import logging
 import json
+from urllib import error as urlerror
 from urllib import request as urlrequest
 from collections import defaultdict
 from datetime import timedelta
@@ -75,9 +76,15 @@ def _send_email(subject, plain, html, recipient):
             },
             method="POST",
         )
-        with urlrequest.urlopen(api_request, timeout=30) as response:
-            if response.status not in {200, 201}:
-                raise RuntimeError(f"Resend returned HTTP {response.status}.")
+        try:
+            with urlrequest.urlopen(api_request, timeout=30) as response:
+                if response.status not in {200, 201}:
+                    raise RuntimeError(f"Resend returned HTTP {response.status}.")
+        except urlerror.HTTPError as exc:
+            details = exc.read().decode("utf-8", errors="replace")
+            raise RuntimeError(
+                f"Resend rejected the email with HTTP {exc.code}: {details}"
+            ) from exc
         return
 
     from django.core.mail import EmailMultiAlternatives
