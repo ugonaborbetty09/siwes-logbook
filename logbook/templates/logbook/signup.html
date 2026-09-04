@@ -1,0 +1,89 @@
+{% extends "logbook/base.html" %}
+{% load static %}
+
+{% block title %}Sign Up - SIWES Logbook Manager{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-icon">S</div>
+      <h2>Create your account</h2>
+      <p>Start managing your SIWES experience</p>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+          <span>{{ message }}</span>
+          <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label for="first_name">First Name</label>
+        <input type="text" id="first_name" name="first_name" placeholder="Your first name" required value="{{ request.POST.first_name }}">
+      </div>
+
+      <div class="form-group">
+        <label for="last_name">Last Name</label>
+        <input type="text" id="last_name" name="last_name" placeholder="Your last name" required value="{{ request.POST.last_name }}">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="your@email.com" required autocomplete="email" value="{{ request.POST.email }}">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div style="position: relative;">
+          <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="new-password" minlength="8">
+          <span onclick="togglePasswordVisibility('password')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none;">👁️</span>
+        </div>
+        <p class="form-hint">At least 8 characters, cannot be entirely numeric.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="password2">Confirm Password</label>
+        <div style="position: relative;">
+          <input type="password" id="password2" name="password2" placeholder="••••••••" required autocomplete="new-password" minlength="8">
+          <span onclick="togglePasswordVisibility('password2')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none;">👁️</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="role">Role</label>
+        <select id="role" name="role" required>
+          <option value="student" {% if request.POST.role == 'student' or not request.POST.role %}selected{% endif %}>Student</option>
+          <option value="supervisor" {% if request.POST.role == 'supervisor' %}selected{% endif %}>Supervisor</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 20px;">Create Account</button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePasswordVisibility(fieldId) {
+  const field = document.getElementById(fieldId);
+  const icon = event.target;
+  if (field.type === 'password') {
+    field.type = 'text';
+    icon.textContent = '👁️‍🗨️';
+  } else {
+    field.type = 'password';
+    icon.textContent = '👁️';
+  }
+}
+</script>
+{% endblock %}

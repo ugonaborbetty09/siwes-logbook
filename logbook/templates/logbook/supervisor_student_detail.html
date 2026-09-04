@@ -1,0 +1,38 @@
+{% extends "logbook/base.html" %}
+
+{% block title %}{{ student.get_full_name|default:student.email }} - Supervisor{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <a href="{% url 'supervisor_dashboard' %}" class="btn btn-ghost btn-sm">← Back to Dashboard</a>
+  <h1 style="margin-top:16px;">{{ student.get_full_name|default:student.email }}</h1>
+  <p>{{ student.email }}{% if profile.institution %} · {{ profile.institution }}{% endif %}</p>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="stat-label">Progress</div><div class="stat-value">{{ profile.progress_percent }}%</div></div>
+  <div class="stat-card"><div class="stat-label">Activities</div><div class="stat-value">{{ activities|length }}</div></div>
+  <div class="stat-card"><div class="stat-label">Completed Days</div><div class="stat-value">{{ profile.days_completed }}</div></div>
+</div>
+
+<div class="card" style="margin-top:28px;">
+  <div class="card-header"><div class="card-title">Student Activities</div></div>
+  {% if activities %}
+    {% for activity in activities %}
+      <div class="supervisor-row" style="cursor:default; margin-bottom:8px;">
+        <div>
+          <strong>{{ activity.title|default:activity.activity|truncatewords:12 }}</strong>
+          <p class="text-sm text-muted">{{ activity.date|date:"M d, Y" }}</p>
+        </div>
+        {% if activity.status == 'pending' %}
+          <a href="{% url 'supervisor_review_activity' activity.pk %}" class="btn btn-primary btn-sm">Review</a>
+        {% else %}
+          <span class="status-badge status-{{ activity.status }}">{{ activity.get_status_display }}</span>
+        {% endif %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="text-muted">This student has not submitted any activities yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

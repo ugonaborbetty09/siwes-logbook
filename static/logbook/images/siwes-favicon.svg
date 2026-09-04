@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title>SIWES Logbook</title>
+  <rect width="64" height="64" rx="16" fill="#7c3aed"/>
+  <path d="M18 14h22a6 6 0 0 1 6 6v29H24a6 6 0 0 1-6-6V14Z" fill="#fff" opacity=".96"/>
+  <path d="M24 14h16a6 6 0 0 1 6 6v29H30a6 6 0 0 1-6-6V14Z" fill="#ede0ff"/>
+  <path d="M31 23h9M31 30h9M31 37h6" fill="none" stroke="#6d28d9" stroke-linecap="round" stroke-width="3"/>
+  <path d="m20 22 2 2 4-5" fill="none" stroke="#7c3aed" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+</svg>

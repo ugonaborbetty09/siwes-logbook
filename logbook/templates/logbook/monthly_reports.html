@@ -1,0 +1,225 @@
+{% extends "logbook/base.html" %}
+{% load static %}
+
+{% block title %}Monthly Reports - SIWES Logbook Manager{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div class="flex-between">
+    <div>
+      <h1>📊 Monthly Reports</h1>
+      <p>Review your monthly progress and achievements</p>
+    </div>
+    <a href="{% url 'generate_pdf' %}" class="btn btn-primary">
+      📄 Download PDF Report
+    </a>
+  </div>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" role="alert" style="margin-bottom: 16px;">
+      <span>{{ message }}</span>
+      <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<!-- Month Selection -->
+{% if months %}
+  <div class="card" style="margin-bottom: 28px;">
+    <form method="get" style="display: flex; gap: 12px; align-items: flex-end;">
+      <div class="form-group" style="flex: 1; min-width: 200px;">
+        <label for="month">Select Month</label>
+        <select name="month" id="month" onchange="this.form.submit()">
+          <option value="">All Months</option>
+          {% for m in months %}
+            <option value="{{ m.year }}-{{ m.month|stringformat:'02d' }}" 
+              {% if selected_data.year == m.year and selected_data.month == m.month %}selected{% endif %}>
+              {{ m.month_name }} {{ m.year }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <a href="{% url 'monthly_reports' %}" class="btn btn-secondary">Clear</a>
+    </form>
+  </div>
+{% endif %}
+
+<!-- Monthly Reports Display -->
+{% if months %}
+  <!-- All Months View (if not selected) -->
+  {% if not selected_data %}
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+      {% for month in months %}
+        <div class="card">
+          <!-- Month Header -->
+          <div class="card-header">
+            <div>
+              <h2 style="margin-bottom: 4px; font-size: 1.2rem;">
+                📆 {{ month.month_name }} {{ month.year }}
+              </h2>
+              <p class="text-sm text-muted">
+                {{ month.count }} 
+                {% if month.count == 1 %}
+                  activity
+                {% else %}
+                  activities
+                {% endif %}
+              </p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <span class="badge badge-purple">{{ month.count }} Items</span>
+              <form method="get" style="display: inline;">
+                <input type="hidden" name="month" value="{{ month.year }}-{{ month.month|stringformat:'02d' }}">
+                <button type="submit" class="btn btn-ghost btn-sm">View Details →</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Month Stats -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border-light);">
+            <div style="text-align: center;">
+              <p class="text-xs text-muted" style="margin-bottom: 6px;">Total Activities</p>
+              <p style="font-size: 1.8rem; font-weight: 800;">{{ month.count }}</p>
+            </div>
+            <div style="text-align: center;">
+              <p class="text-xs text-muted" style="margin-bottom: 6px;">Weeks Covered</p>
+              <p style="font-size: 1.8rem; font-weight: 800;">{{ month.weeks|length }}</p>
+            </div>
+            <div style="text-align: center;">
+              <p class="text-xs text-muted" style="margin-bottom: 6px;">Skills Developed</p>
+              <p style="font-size: 1.8rem; font-weight: 800;">{{ month.skills|length }}</p>
+            </div>
+          </div>
+
+          <!-- Skills Overview -->
+          {% if month.skills %}
+            <div style="margin-bottom: 16px;">
+              <h3 style="font-size: 0.95rem; margin-bottom: 8px; color: var(--text-secondary);">🎓 Key Skills</h3>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                {% for skill in month.skills|slice:":5" %}
+                  <span class="badge badge-purple" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                    {{ skill|truncatewords:5 }}
+                  </span>
+                {% endfor %}
+                {% if month.skills|length > 5 %}
+                  <span class="text-xs text-muted" style="align-self: center;">
+                    +{{ month.skills|length|add:"-5" }} more
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <!-- Single Month Detailed View -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h1 style="margin-bottom: 4px;">{{ selected_data.month_name }} {{ selected_data.year }}</h1>
+          <p class="text-sm text-muted">
+            {{ selected_data.count }} activities recorded this month
+          </p>
+        </div>
+      </div>
+
+      <!-- Month Summary Stats -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 28px; padding: 20px; background: var(--bg-secondary); border-radius: var(--radius-md);">
+        <div style="text-align: center;">
+          <p class="text-xs text-muted" style="margin-bottom: 6px;">Total Activities</p>
+          <p style="font-size: 2rem; font-weight: 800; color: var(--accent);">{{ selected_data.count }}</p>
+        </div>
+        <div style="text-align: center;">
+          <p class="text-xs text-muted" style="margin-bottom: 6px;">Weeks Covered</p>
+          <p style="font-size: 2rem; font-weight: 800; color: var(--accent);">{{ selected_data.weeks|length }}</p>
+        </div>
+        <div style="text-align: center;">
+          <p class="text-xs text-muted" style="margin-bottom: 6px;">Skills Developed</p>
+          <p style="font-size: 2rem; font-weight: 800; color: var(--accent);">{{ selected_data.skills|length }}</p>
+        </div>
+        <div style="text-align: center;">
+          <p class="text-xs text-muted" style="margin-bottom: 6px;">Challenges Faced</p>
+          <p style="font-size: 2rem; font-weight: 800; color: var(--warning);">{{ selected_data.challenges|length }}</p>
+        </div>
+      </div>
+
+      <!-- Weekly Breakdown -->
+      {% if selected_data.weeks %}
+        <div style="margin-bottom: 28px;">
+          <h3 style="margin-bottom: 12px; font-size: 1rem;">📅 Weekly Breakdown</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
+            {% for week_num, activities in selected_data.weeks %}
+              <div style="padding: 12px; background: var(--bg-secondary); border-radius: var(--radius-md); border-left: 3px solid var(--accent); text-align: center;">
+                <p class="text-xs text-muted" style="margin-bottom: 6px;">Week {{ week_num }}</p>
+                <p style="font-size: 1.4rem; font-weight: 700;">{{ activities|length }}</p>
+                <p class="text-xs text-muted">activities</p>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Skills Developed -->
+      {% if selected_data.skills %}
+        <div style="margin-bottom: 28px; padding: 16px; background: rgba(124, 58, 237, 0.1); border-radius: var(--radius-md); border-left: 3px solid var(--accent);">
+          <h3 style="margin-bottom: 12px; font-size: 1rem;">🎓 Skills & Technologies Used</h3>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            {% for skill in selected_data.skills %}
+              <div style="padding: 8px; background: var(--bg-secondary); border-radius: var(--radius-sm);">
+                {{ skill }}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Challenges -->
+      {% if selected_data.challenges %}
+        <div style="margin-bottom: 28px; padding: 16px; background: rgba(245, 158, 11, 0.1); border-radius: var(--radius-md); border-left: 3px solid var(--warning);">
+          <h3 style="margin-bottom: 12px; font-size: 1rem;">⚠️ Challenges Encountered</h3>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            {% for challenge in selected_data.challenges %}
+              <div style="padding: 8px; background: var(--bg-secondary); border-radius: var(--radius-sm);">
+                {{ challenge }}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Activities List -->
+      <div style="margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--border-light);">
+        <h3 style="margin-bottom: 12px; font-size: 1rem;">📝 All Activities</h3>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          {% for activity in selected_data.activities %}
+            <div style="padding: 12px; background: var(--bg-secondary); border-radius: var(--radius-md); border-left: 3px solid var(--accent);">
+              <div class="flex-between" style="margin-bottom: 6px;">
+                <strong>{{ activity.date|date:"M d, D" }}</strong>
+                <a href="{% url 'activity_detail' activity.pk %}" class="btn btn-ghost btn-sm">View</a>
+              </div>
+              <p class="text-sm" style="color: var(--text-secondary);">
+                {{ activity.title|default:activity.activity|truncatewords:20 }}
+              </p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% else %}
+  <!-- Empty State -->
+  <div class="card" style="text-align: center; padding: 60px 30px;">
+    <p style="font-size: 3rem; margin-bottom: 12px;">📊</p>
+    <h3 style="margin-bottom: 8px;">No monthly reports yet</h3>
+    <p class="text-muted" style="margin-bottom: 24px;">
+      Start recording activities to generate monthly reports
+    </p>
+    <a href="{% url 'add_activity' %}" class="btn btn-primary">Add Your First Activity</a>
+  </div>
+{% endif %}
+
+{% endblock %}

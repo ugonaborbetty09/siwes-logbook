@@ -1,0 +1,508 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIWES Report - {{ user.first_name }} {{ user.last_name }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            color: #1a1030;
+            line-height: 1.6;
+            font-size: 11px;
+        }
+        
+        .page {
+            page-break-after: always;
+            padding: 40px;
+            min-height: 100vh;
+        }
+        
+        .last-page {
+            page-break-after: avoid;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #7c3aed;
+            padding-bottom: 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #7c3aed;
+            margin-bottom: 10px;
+        }
+        
+        .logo span {
+            color: #1a1030;
+        }
+        
+        .report-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1a1030;
+            margin: 10px 0;
+        }
+        
+        .report-subtitle {
+            font-size: 10px;
+            color: #666;
+        }
+        
+        /* Section */
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #7c3aed;
+            background: #f8f7ff;
+            padding: 8px 10px;
+            margin-bottom: 12px;
+            border-left: 4px solid #7c3aed;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        
+        th {
+            background: #7c3aed;
+            color: white;
+            padding: 8px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 10px;
+        }
+        
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 10px;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f7ff;
+        }
+        
+        /* Student Info Box */
+        .info-box {
+            border: 1px solid #7c3aed;
+            padding: 12px;
+            margin: 10px 0;
+            background: #f8f7ff;
+            border-radius: 4px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 10px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            width: 35%;
+        }
+        
+        .info-value {
+            width: 65%;
+            text-align: left;
+            word-wrap: break-word;
+        }
+        
+        /* Stats */
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+        }
+        
+        .stat-box {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #7c3aed;
+            flex: 1;
+            margin: 0 5px;
+            background: #f8f7ff;
+            border-radius: 4px;
+        }
+        
+        .stat-number {
+            font-size: 16px;
+            font-weight: bold;
+            color: #7c3aed;
+        }
+        
+        .stat-label {
+            font-size: 9px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        /* Activity List */
+        .activity-item {
+            border-left: 3px solid #7c3aed;
+            padding: 10px;
+            margin: 8px 0;
+            background: #f8f7ff;
+            page-break-inside: avoid;
+        }
+        
+        .activity-date {
+            font-weight: bold;
+            color: #7c3aed;
+            font-size: 10px;
+            margin-bottom: 4px;
+        }
+        
+        .activity-title {
+            font-weight: bold;
+            font-size: 10px;
+            margin-bottom: 4px;
+        }
+        
+        .activity-text {
+            font-size: 9px;
+            color: #333;
+            margin-top: 4px;
+        }
+        
+        /* Signatures */
+        .signature-section {
+            margin-top: 40px;
+            page-break-inside: avoid;
+        }
+        
+        .signature-line {
+            display: inline-block;
+            width: 45%;
+            margin-right: 5%;
+            vertical-align: top;
+        }
+        
+        .sig-box {
+            border: 1px solid #ccc;
+            height: 60px;
+            margin-bottom: 5px;
+            text-align: center;
+            background: #f9f9f9;
+        }
+        
+        .sig-label {
+            font-weight: bold;
+            font-size: 10px;
+            margin-top: 3px;
+        }
+        
+        .sig-date {
+            font-size: 9px;
+            color: #666;
+            margin-top: 2px;
+        }
+        
+        /* Page Number */
+        .footer {
+            text-align: center;
+            font-size: 9px;
+            color: #999;
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 15px;
+            background: #e0e0e0;
+            border-radius: 8px;
+            margin: 5px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7c3aed, #9b59f5);
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+
+<!-- PAGE 1: Cover & Student Info -->
+<div class="page">
+    <div class="header">
+        <div class="logo">SIWES<span>Logbook</span></div>
+        <div class="report-title">SIWES Logbook Report</div>
+        <div class="report-subtitle">Industrial Training Progress Report</div>
+    </div>
+
+    <!-- Student Information -->
+    <div class="section">
+        <div class="section-title">📚 Student Information</div>
+        <div class="info-box">
+            <div class="info-row">
+                <span class="info-label">Full Name:</span>
+                <span class="info-value">{{ user.first_name }} {{ user.last_name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Email:</span>
+                <span class="info-value">{{ user.email }}</span>
+            </div>
+            {% if profile.matric_number %}
+            <div class="info-row">
+                <span class="info-label">Matric Number:</span>
+                <span class="info-value">{{ profile.matric_number }}</span>
+            </div>
+            {% endif %}
+            {% if profile.institution %}
+            <div class="info-row">
+                <span class="info-label">Institution:</span>
+                <span class="info-value">{{ profile.institution }}</span>
+            </div>
+            {% endif %}
+            {% if profile.course %}
+            <div class="info-row">
+                <span class="info-label">Course:</span>
+                <span class="info-value">{{ profile.course }}</span>
+            </div>
+            {% endif %}
+            {% if profile.department %}
+            <div class="info-row">
+                <span class="info-label">Department:</span>
+                <span class="info-value">{{ profile.department }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- SIWES Information -->
+    <div class="section">
+        <div class="section-title">🏢 SIWES Information</div>
+        <div class="info-box">
+            {% if profile.siwes_org %}
+            <div class="info-row">
+                <span class="info-label">Organization:</span>
+                <span class="info-value">{{ profile.siwes_org }}</span>
+            </div>
+            {% endif %}
+            {% if profile.siwes_start %}
+            <div class="info-row">
+                <span class="info-label">Start Date:</span>
+                <span class="info-value">{{ profile.siwes_start|date:"M d, Y" }}</span>
+            </div>
+            {% endif %}
+            {% if profile.siwes_end %}
+            <div class="info-row">
+                <span class="info-label">End Date:</span>
+                <span class="info-value">{{ profile.siwes_end|date:"M d, Y" }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Progress Stats -->
+    <div class="section">
+        <div class="section-title">📊 Progress Summary</div>
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-number">{{ activities|length }}</div>
+                <div class="stat-label">Total Activities</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">{{ weeks|length }}</div>
+                <div class="stat-label">Weeks</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supervisors -->
+    <div class="section">
+        <div class="section-title">👥 Supervisors</div>
+        
+        {% if school_sup and school_sup.full_name %}
+        <div class="info-box" style="margin-bottom: 12px;">
+            <div style="font-weight: bold; color: #7c3aed; margin-bottom: 6px;">School Supervisor</div>
+            <div class="info-row">
+                <span class="info-label">Name:</span>
+                <span class="info-value">{{ school_sup.full_name }}</span>
+            </div>
+            {% if school_sup.department %}
+            <div class="info-row">
+                <span class="info-label">Department:</span>
+                <span class="info-value">{{ school_sup.department }}</span>
+            </div>
+            {% endif %}
+            {% if school_sup.email %}
+            <div class="info-row">
+                <span class="info-label">Email:</span>
+                <span class="info-value">{{ school_sup.email }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if industry_sup and industry_sup.full_name %}
+        <div class="info-box">
+            <div style="font-weight: bold; color: #7c3aed; margin-bottom: 6px;">Industry Supervisor</div>
+            <div class="info-row">
+                <span class="info-label">Name:</span>
+                <span class="info-value">{{ industry_sup.full_name }}</span>
+            </div>
+            {% if industry_sup.company %}
+            <div class="info-row">
+                <span class="info-label">Company:</span>
+                <span class="info-value">{{ industry_sup.company }}</span>
+            </div>
+            {% endif %}
+            {% if industry_sup.email %}
+            <div class="info-row">
+                <span class="info-label">Email:</span>
+                <span class="info-value">{{ industry_sup.email }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        Report generated on {{ generated|date:"M d, Y" }}
+    </div>
+</div>
+
+<!-- PAGE 2+: Weekly Reports -->
+{% for week in weeks %}
+<div class="page">
+    <div style="margin-bottom: 20px;">
+        <h2 style="color: #7c3aed; font-size: 14px; margin-bottom: 5px;">Week {{ week.week_number }}</h2>
+        <div style="font-size: 9px; color: #666;">{{ week.first_day|date:"M d" }} – {{ week.last_day|date:"M d, Y" }}</div>
+    </div>
+
+    <!-- Activities -->
+    <div class="section">
+        <div class="section-title">📝 Activities</div>
+        {% for activity in week.activities %}
+            <div class="activity-item">
+                <div class="activity-date">{{ activity.date|date:"M d, Y (D)" }}</div>
+                {% if activity.title %}
+                <div class="activity-title">{{ activity.title }}</div>
+                {% endif %}
+                <div class="activity-text">
+                    <strong>Description:</strong> {{ activity.activity|truncatewords:50 }}
+                </div>
+                {% if activity.skills_learned %}
+                <div class="activity-text">
+                    <strong>Skills:</strong> {{ activity.skills_learned|truncatewords:20 }}
+                </div>
+                {% endif %}
+                {% if activity.challenges %}
+                <div class="activity-text">
+                    <strong>Challenges:</strong> {{ activity.challenges|truncatewords:20 }}
+                </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="footer">
+        Week {{ week.week_number }} Report | Page for verification
+    </div>
+</div>
+{% endfor %}
+
+<!-- LAST PAGE: Approvals & Signatures -->
+<div class="page last-page">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h2 style="color: #7c3aed; font-size: 16px;">Approvals & Signatures</h2>
+    </div>
+
+    <!-- School Supervisor Signature -->
+    {% if school_sup %}
+    <div style="margin-bottom: 40px;">
+        <h3 style="font-size: 11px; font-weight: bold; color: #7c3aed; margin-bottom: 15px;">School Supervisor</h3>
+        <table style="width: 100%;">
+            <tr>
+                <td style="border: none; padding: 0;">
+                    <div style="border-bottom: 1px solid #333; height: 60px;"></div>
+                    <div style="font-weight: bold; margin-top: 5px; font-size: 10px;">Signature</div>
+                </td>
+                <td style="border: none; padding: 0; padding-left: 20px;">
+                    <div style="border-bottom: 1px solid #333; height: 60px;"></div>
+                    <div style="font-weight: bold; margin-top: 5px; font-size: 10px;">Date</div>
+                </td>
+            </tr>
+            <tr>
+                <td style="border: none; padding: 0; padding-top: 15px;">
+                    <div style="font-size: 9px; color: #666;">Name: {{ school_sup.full_name|default:"_______________________" }}</div>
+                </td>
+                <td style="border: none; padding: 0; padding-left: 20px;"></td>
+            </tr>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- Industry Supervisor Signature -->
+    {% if industry_sup %}
+    <div style="margin-bottom: 40px;">
+        <h3 style="font-size: 11px; font-weight: bold; color: #7c3aed; margin-bottom: 15px;">Industry Supervisor</h3>
+        <table style="width: 100%;">
+            <tr>
+                <td style="border: none; padding: 0;">
+                    <div style="border-bottom: 1px solid #333; height: 60px;"></div>
+                    <div style="font-weight: bold; margin-top: 5px; font-size: 10px;">Signature</div>
+                </td>
+                <td style="border: none; padding: 0; padding-left: 20px;">
+                    <div style="border-bottom: 1px solid #333; height: 60px;"></div>
+                    <div style="font-weight: bold; margin-top: 5px; font-size: 10px;">Date</div>
+                </td>
+            </tr>
+            <tr>
+                <td style="border: none; padding: 0; padding-top: 15px;">
+                    <div style="font-size: 9px; color: #666;">Name: {{ industry_sup.full_name|default:"_______________________" }}</div>
+                </td>
+                <td style="border: none; padding: 0; padding-left: 20px;"></td>
+            </tr>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- Certification -->
+    <div style="margin-top: 50px; text-align: center; border: 2px solid #7c3aed; padding: 20px; border-radius: 4px; background: #f8f7ff;">
+        <div style="font-weight: bold; color: #7c3aed; margin-bottom: 10px; font-size: 11px;">
+            CERTIFICATION
+        </div>
+        <div style="font-size: 9px; line-height: 1.6; color: #333;">
+            I hereby certify that this SIWES logbook report is an accurate and complete record of my activities during the Industrial Training Programme. All information contained herein is true to the best of my knowledge.
+        </div>
+        <div style="margin-top: 20px;">
+            <div style="display: inline-block; width: 45%;">
+                <div style="border-bottom: 1px solid #333; height: 50px;"></div>
+                <div style="font-weight: bold; font-size: 9px; margin-top: 5px;">Student Signature</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        End of Report | Generated on {{ generated_at|date:"M d, Y" }} at {{ generated_at|date:"H:i" }}
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,170 @@
+{% extends "logbook/base.html" %}
+{% load static %}
+
+{% block title %}{{ activity.title|default:"Activity" }} - SIWES Logbook Manager{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div class="flex-between">
+    <div>
+      <h1>{{ activity.title|default:"Activity Details" }}</h1>
+      <p>📅 {{ activity.date|date:"M d, Y" }}</p>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      {% if activity.status == 'pending' %}
+        <a href="{% url 'edit_activity' activity.pk %}" class="btn btn-secondary">Edit</a>
+      {% endif %}
+      <a href="{% url 'activity_list' %}" class="btn btn-ghost">Back</a>
+    </div>
+  </div>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" role="alert" style="margin-bottom: 16px;">
+      <span>{{ message }}</span>
+      <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<!-- Activity Details -->
+<div style="display: grid; grid-template-columns: 1fr 300px; gap: 28px; max-width: 1000px;">
+  <!-- Main Content -->
+  <div>
+    <!-- Description -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📝 Description</div>
+      </div>
+      <div style="line-height: 1.8; color: var(--text-secondary); white-space: pre-wrap; word-wrap: break-word;">
+        {{ activity.activity }}
+      </div>
+    </div>
+
+    <!-- Skills Learned -->
+    {% if activity.skills_learned %}
+      <div class="card" style="margin-top: 16px;">
+        <div class="card-header">
+          <div class="card-title">🎓 Skills & Technologies Used</div>
+        </div>
+        <div style="line-height: 1.8; color: var(--text-secondary); white-space: pre-wrap; word-wrap: break-word;">
+          {{ activity.skills_learned }}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Challenges -->
+    {% if activity.challenges %}
+      <div class="card" style="margin-top: 16px;">
+        <div class="card-header">
+          <div class="card-title">⚠️ Challenges Encountered</div>
+        </div>
+        <div style="line-height: 1.8; color: var(--text-secondary); white-space: pre-wrap; word-wrap: break-word;">
+          {{ activity.challenges }}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- What Learned -->
+    {% if activity.what_learned %}
+      <div class="card" style="margin-top: 16px;">
+        <div class="card-header">
+          <div class="card-title">💡 What I Learned</div>
+        </div>
+        <div style="line-height: 1.8; color: var(--text-secondary); white-space: pre-wrap; word-wrap: break-word;">
+          {{ activity.what_learned }}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Attachment -->
+    {% if activity.attachment %}
+      <div class="card" style="margin-top: 16px;">
+        <div class="card-header">
+          <div class="card-title">📎 Attachment</div>
+        </div>
+        {% if activity.attachment_is_image %}
+          <div style="border-radius: var(--radius-md); overflow: hidden; max-height: 400px;">
+            <img src="{{ activity.attachment.url }}" alt="Activity attachment" style="width: 100%; height: auto;">
+          </div>
+        {% endif %}
+        <a href="{{ activity.attachment.url }}" download class="btn btn-primary btn-sm" style="margin-top: 12px;">
+          <span>📥</span> Download {{ activity.attachment.name|truncatechars:30 }}
+        </a>
+      </div>
+    {% endif %}
+
+    <!-- Supervisor Comments -->
+    {% if activity.supervisor_comment %}
+      <div class="card" style="margin-top: 16px; background: var(--accent-light); border-color: var(--accent);">
+        <div class="card-header">
+          <div class="card-title">💬 Supervisor Comment</div>
+        </div>
+        <div style="line-height: 1.8; color: var(--text-secondary); white-space: pre-wrap; word-wrap: break-word;">
+          {{ activity.supervisor_comment }}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Timestamps -->
+    <div class="card" style="margin-top: 16px; background: var(--bg-secondary);">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <p class="text-xs text-muted">Created</p>
+          <p class="text-sm">{{ activity.created_at|date:"M d, Y H:i" }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-muted">Last Updated</p>
+          <p class="text-sm">{{ activity.updated_at|date:"M d, Y H:i" }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div style="position: sticky; top: 100px; height: fit-content;">
+    <!-- Info Card -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom: 16px;">Activity Info</div>
+      
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div>
+          <p class="text-xs text-muted">Date</p>
+          <p class="text-sm font-bold">{{ activity.date|date:"M d, Y" }}</p>
+        </div>
+
+        {% if activity.day %}
+          <div>
+            <p class="text-xs text-muted">Day</p>
+            <p class="text-sm font-bold">{{ activity.day }}</p>
+          </div>
+        {% endif %}
+
+        <div>
+          <p class="text-xs text-muted">Week Number</p>
+          <p class="text-sm font-bold">Week {{ activity.week_number }}</p>
+        </div>
+
+        <div>
+          <p class="text-xs text-muted">Status</p>
+          <span class="badge {% if activity.status == 'approved' %}badge-green{% elif activity.status == 'rejected' %}badge-red{% else %}badge-yellow{% endif %}">{{ activity.get_status_display }}</span>
+        </div>
+
+        <div style="padding-top: 16px; border-top: 1px solid var(--border-light);">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <a href="{% url 'edit_activity' activity.pk %}" class="btn btn-secondary btn-sm btn-full">
+              ✏️ Edit
+            </a>
+            <a href="{% url 'delete_activity' activity.pk %}" class="btn btn-danger btn-sm btn-full">
+              🗑️ Delete
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

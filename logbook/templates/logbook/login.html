@@ -1,0 +1,62 @@
+{% extends "logbook/base.html" %}
+{% load static %}
+
+{% block title %}Log In - SIWES Logbook Manager{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-icon">S</div>
+      <h2>Welcome Back</h2>
+      <p>Log in to your SIWES Logbook account</p>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+          <span>{{ message }}</span>
+          <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="your@email.com" required autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div style="position: relative;">
+          <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+          <span onclick="togglePasswordVisibility('password')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none;">👁️</span>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 20px;">Log In</button>
+    </form>
+
+    <div class="auth-footer">
+      <p><a href="{% url 'forgot_password' %}">Forgot your password?</a></p>
+      <p>Don't have an account? <a href="{% url 'signup' %}">Sign up here</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePasswordVisibility(fieldId) {
+  const field = document.getElementById(fieldId);
+  const icon = event.target;
+  if (field.type === 'password') {
+    field.type = 'text';
+    icon.textContent = '👁️‍🗨️';
+  } else {
+    field.type = 'password';
+    icon.textContent = '👁️';
+  }
+}
+</script>
+{% endblock %}

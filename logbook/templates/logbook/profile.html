@@ -1,0 +1,628 @@
+{% extends "logbook/base.html" %}
+{% load static %}
+
+{% block title %}Profile - SIWES Logbook Manager{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>👤 My Profile</h1>
+  <p>Manage your account, supervisor information, and settings</p>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" role="alert" style="margin-bottom: 16px;">
+      <span>{{ message }}</span>
+      <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<!-- Tabs -->
+<div class="tabs" style="margin-bottom: 28px; display: flex; gap: 8px; border-bottom: 1px solid var(--border-light); overflow-x: auto;">
+  <button class="tab-btn active" onclick="switchTab(event, 'personal')">📋 Personal</button>
+  <button class="tab-btn" onclick="switchTab(event, 'school_supervisor')">🏫 School Supervisor</button>
+  <button class="tab-btn" onclick="switchTab(event, 'industry_supervisor')">🏢 Industry Supervisor</button>
+  <button class="tab-btn" onclick="switchTab(event, 'password')">🔐 Password</button>
+</div>
+
+<!-- TAB 1: Personal Information -->
+<div id="personal" class="tab-content" style="display: block;">
+  <div style="max-width: 800px;">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Personal Information</div>
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="section" value="personal">
+
+        <!-- Name -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label for="first_name">First Name</label>
+            <input 
+              type="text" 
+              id="first_name" 
+              name="first_name" 
+              value="{{ user.first_name }}"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="last_name">Last Name</label>
+            <input 
+              type="text" 
+              id="last_name" 
+              name="last_name" 
+              value="{{ user.last_name }}"
+              required
+            >
+          </div>
+        </div>
+
+        <!-- Email (read-only) -->
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input 
+            type="email" 
+            id="email" 
+            value="{{ user.email }}"
+            readonly
+            disabled
+          >
+          <p class="form-hint">Email cannot be changed from here</p>
+        </div>
+
+        <!-- Institution -->
+        <div class="form-group">
+          <label for="institution">Institution/University</label>
+          <input 
+            type="text" 
+            id="institution" 
+            name="institution" 
+            placeholder="e.g., University of Lagos" 
+            value="{{ prof.institution }}"
+          >
+        </div>
+
+        <!-- Course & Department -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label for="course">Course/Program</label>
+            <input 
+              type="text" 
+              id="course" 
+              name="course" 
+              placeholder="e.g., Computer Science" 
+              value="{{ prof.course }}"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="department">Department</label>
+            <input 
+              type="text" 
+              id="department" 
+              name="department" 
+              placeholder="e.g., Engineering" 
+              value="{{ prof.department }}"
+            >
+          </div>
+        </div>
+
+        <!-- Matric Number -->
+        <div class="form-group">
+          <label for="matric_number">Matric/Student ID</label>
+          <input 
+            type="text" 
+            id="matric_number" 
+            name="matric_number" 
+            placeholder="Your student ID" 
+            value="{{ prof.matric_number }}"
+          >
+        </div>
+
+        <!-- SIWES Organization -->
+        <div class="form-group">
+          <label for="siwes_org">SIWES Organization/Company</label>
+          <input 
+            type="text" 
+            id="siwes_org" 
+            name="siwes_org" 
+            placeholder="Your SIWES company" 
+            value="{{ prof.siwes_org }}"
+          >
+        </div>
+
+        <!-- SIWES Dates -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label for="siwes_start">SIWES Start Date</label>
+            <input 
+              type="date" 
+              id="siwes_start" 
+              name="siwes_start" 
+              value="{% if prof.siwes_start %}{{ prof.siwes_start|date:'Y-m-d' }}{% endif %}"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="siwes_end">SIWES End Date</label>
+            <input 
+              type="date" 
+              id="siwes_end" 
+              name="siwes_end" 
+              value="{% if prof.siwes_end %}{{ prof.siwes_end|date:'Y-m-d' }}{% endif %}"
+            >
+          </div>
+        </div>
+
+        <!-- Bio -->
+        <div class="form-group">
+          <label for="bio">Bio (Optional)</label>
+          <textarea 
+            id="bio" 
+            name="bio" 
+            placeholder="Tell us about yourself..." 
+            style="min-height: 100px;"
+          >{{ prof.bio }}</textarea>
+        </div>
+
+        <!-- Profile Picture -->
+        <div class="form-group">
+          <label for="profile_picture">Profile Picture</label>
+          {% if prof.profile_picture %}
+            <div style="margin-bottom: 12px;">
+              <img src="{{ prof.profile_picture.url }}" alt="Profile" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent);">
+            </div>
+          {% endif %}
+          <input 
+            type="file" 
+            id="profile_picture" 
+            name="profile_picture" 
+            accept="image/*"
+          >
+          <p class="form-hint">JPG, PNG, GIF, or WebP (Max 10 MB)</p>
+        </div>
+
+        <!-- Submit -->
+        <div style="margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--border-light);">
+          <button type="submit" class="btn btn-primary btn-lg">
+            ✓ Save Personal Info
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 2: School Supervisor -->
+<div id="school_supervisor" class="tab-content" style="display: none;">
+  <div style="max-width: 800px;">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">School Supervisor Information</div>
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="section" value="school_supervisor">
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label for="ss_full_name">Full Name</label>
+            <input 
+              type="text" 
+              id="ss_full_name" 
+              name="ss_full_name" 
+              placeholder="Supervisor's full name" 
+              value="{{ school_sup.full_name }}"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="ss_email">Email</label>
+            <input 
+              type="email" 
+              id="ss_email" 
+              name="ss_email" 
+              placeholder="supervisor@email.com" 
+              value="{{ school_sup.email }}"
+            >
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label for="ss_phone">Phone Number</label>
+            <input 
+              type="tel" 
+              id="ss_phone" 
+              name="ss_phone" 
+              placeholder="+234..." 
+              value="{{ school_sup.phone }}"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="ss_department">Department</label>
+            <input 
+              type="text" 
+              id="ss_department" 
+              name="ss_department" 
+              placeholder="Department" 
+              value="{{ school_sup.department }}"
+            >
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label for="ss_faculty">Faculty</label>
+            <input 
+              type="text" 
+              id="ss_faculty" 
+              name="ss_faculty" 
+              placeholder="Faculty" 
+              value="{{ school_sup.faculty }}"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="ss_institution">Institution</label>
+            <input 
+              type="text" 
+              id="ss_institution" 
+              name="ss_institution" 
+              placeholder="Institution" 
+              value="{{ school_sup.institution }}"
+            >
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label for="ss_staff_id">Staff ID</label>
+            <input 
+              type="text" 
+              id="ss_staff_id" 
+              name="ss_staff_id" 
+              placeholder="Staff ID" 
+              value="{{ school_sup.staff_id }}"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="ss_position">Position</label>
+            <input 
+              type="text" 
+              id="ss_position" 
+              name="ss_position" 
+              placeholder="e.g., Senior Lecturer" 
+              value="{{ school_sup.position }}"
+            >
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label for="ss_profile_picture">Profile Picture</label>
+            {% if school_sup.profile_picture %}
+              <div style="margin-bottom: 8px;">
+                <img src="{{ school_sup.profile_picture.url }}" alt="Profile" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover;">
+              </div>
+            {% endif %}
+            <input 
+              type="file" 
+              id="ss_profile_picture" 
+              name="ss_profile_picture" 
+              accept="image/*"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="ss_signature">Signature</label>
+            {% if school_sup.signature %}
+              <div style="margin-bottom: 8px;">
+                <img src="{{ school_sup.signature.url }}" alt="Signature" style="width: 100px; height: auto; border-radius: 4px;">
+              </div>
+            {% endif %}
+            <input 
+              type="file" 
+              id="ss_signature" 
+              name="ss_signature" 
+              accept="image/*"
+            >
+          </div>
+        </div>
+
+        <div style="margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--border-light);">
+          <button type="submit" class="btn btn-primary btn-lg">
+            ✓ Save School Supervisor Info
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3: Industry Supervisor -->
+<div id="industry_supervisor" class="tab-content" style="display: none;">
+  <div style="max-width: 800px;">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Industry Supervisor Information</div>
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="section" value="industry_supervisor">
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label for="is_full_name">Full Name</label>
+            <input 
+              type="text" 
+              id="is_full_name" 
+              name="is_full_name" 
+              placeholder="Supervisor's full name" 
+              value="{{ industry_sup.full_name }}"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="is_email">Email</label>
+            <input 
+              type="email" 
+              id="is_email" 
+              name="is_email" 
+              placeholder="supervisor@company.com" 
+              value="{{ industry_sup.email }}"
+            >
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label for="is_phone">Phone Number</label>
+            <input 
+              type="tel" 
+              id="is_phone" 
+              name="is_phone" 
+              placeholder="+234..." 
+              value="{{ industry_sup.phone }}"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="is_company">Company/Organization</label>
+            <input 
+              type="text" 
+              id="is_company" 
+              name="is_company" 
+              placeholder="Company name" 
+              value="{{ industry_sup.company }}"
+            >
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label for="is_department">Department/Unit</label>
+            <input 
+              type="text" 
+              id="is_department" 
+              name="is_department" 
+              placeholder="Department" 
+              value="{{ industry_sup.department }}"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="is_job_title">Job Title/Position</label>
+            <input 
+              type="text" 
+              id="is_job_title" 
+              name="is_job_title" 
+              placeholder="e.g., Senior Developer" 
+              value="{{ industry_sup.job_title }}"
+            >
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label for="is_employee_id">Employee ID (Optional)</label>
+            <input 
+              type="text" 
+              id="is_employee_id" 
+              name="is_employee_id" 
+              placeholder="Employee ID" 
+              value="{{ industry_sup.employee_id }}"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="is_office_address">Office Address (Optional)</label>
+            <input 
+              type="text" 
+              id="is_office_address" 
+              name="is_office_address" 
+              placeholder="Office address" 
+              value="{{ industry_sup.office_address }}"
+            >
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label for="is_profile_picture">Profile Picture</label>
+            {% if industry_sup.profile_picture %}
+              <div style="margin-bottom: 8px;">
+                <img src="{{ industry_sup.profile_picture.url }}" alt="Profile" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover;">
+              </div>
+            {% endif %}
+            <input 
+              type="file" 
+              id="is_profile_picture" 
+              name="is_profile_picture" 
+              accept="image/*"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="is_signature">Signature</label>
+            {% if industry_sup.signature %}
+              <div style="margin-bottom: 8px;">
+                <img src="{{ industry_sup.signature.url }}" alt="Signature" style="width: 100px; height: auto; border-radius: 4px;">
+              </div>
+            {% endif %}
+            <input 
+              type="file" 
+              id="is_signature" 
+              name="is_signature" 
+              accept="image/*"
+            >
+          </div>
+        </div>
+
+        <div style="margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--border-light);">
+          <button type="submit" class="btn btn-primary btn-lg">
+            ✓ Save Industry Supervisor Info
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 4: Change Password -->
+<div id="password" class="tab-content" style="display: none;">
+  <div style="max-width: 800px;">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Change Password</div>
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="section" value="password">
+
+        <div class="form-group">
+          <label for="old_password">Current Password</label>
+          <div class="input-group">
+            <input 
+              type="password" 
+              id="old_password" 
+              name="old_password" 
+              placeholder="••••••••" 
+              required
+              autocomplete="current-password"
+            >
+            <span class="input-action" onclick="togglePasswordVisibility('old_password')" style="cursor: pointer;">👁️</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="new_password">New Password</label>
+          <div class="input-group">
+            <input 
+              type="password" 
+              id="new_password" 
+              name="new_password" 
+              placeholder="••••••••" 
+              required
+              autocomplete="new-password"
+            >
+            <span class="input-action" onclick="togglePasswordVisibility('new_password')" style="cursor: pointer;">👁️</span>
+          </div>
+          <p class="form-hint">At least 8 characters, must not be entirely numeric</p>
+        </div>
+
+        <div class="form-group">
+          <label for="new_password2">Confirm New Password</label>
+          <div class="input-group">
+            <input 
+              type="password" 
+              id="new_password2" 
+              name="new_password2" 
+              placeholder="••••••••" 
+              required
+              autocomplete="new-password"
+            >
+            <span class="input-action" onclick="togglePasswordVisibility('new_password2')" style="cursor: pointer;">👁️</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--border-light);">
+          <button type="submit" class="btn btn-primary btn-lg">
+            🔐 Change Password
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(e, tabName) {
+  // Hide all tabs
+  const tabs = document.querySelectorAll('.tab-content');
+  tabs.forEach(tab => tab.style.display = 'none');
+  
+  // Remove active class from buttons
+  const buttons = document.querySelectorAll('.tab-btn');
+  buttons.forEach(btn => btn.classList.remove('active'));
+  
+  // Show selected tab
+  document.getElementById(tabName).style.display = 'block';
+  e.target.classList.add('active');
+}
+
+function togglePasswordVisibility(fieldId) {
+  const field = document.getElementById(fieldId);
+  const icon = event.target;
+  
+  if (field.type === 'password') {
+    field.type = 'text';
+    icon.textContent = '👁️‍🗨️';
+  } else {
+    field.type = 'password';
+    icon.textContent = '👁️';
+  }
+}
+</script>
+
+<style>
+.tabs {
+  display: flex;
+  gap: 0;
+}
+
+.tab-btn {
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all var(--transition);
+  font-size: 0.9rem;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+</style>
+
+{% endblock %}

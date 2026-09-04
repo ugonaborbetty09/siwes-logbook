@@ -1,0 +1,27 @@
+{% extends "logbook/base.html" %}
+
+{% block title %}Review Activity - SIWES Logbook Manager{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Review Activity</h1>
+  <p>{{ activity.user.get_full_name|default:activity.user.email }} · {{ activity.date|date:"M d, Y" }}</p>
+</div>
+<div class="card" style="max-width:800px;">
+  <h3>{{ activity.title|default:"Daily Activity" }}</h3>
+  <p style="white-space:pre-wrap; margin-top:16px;">{{ activity.activity }}</p>
+  {% if activity.skills_learned %}<p style="white-space:pre-wrap; margin-top:16px;"><strong>Skills:</strong> {{ activity.skills_learned }}</p>{% endif %}
+  <form method="post" style="margin-top:24px;">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="supervisor_comment">Supervisor Comment</label>
+      <textarea id="supervisor_comment" name="supervisor_comment" rows="5" placeholder="Add feedback for the student">{{ activity.supervisor_comment }}</textarea>
+    </div>
+    <div style="display:flex; gap:12px;">
+      <button class="btn btn-primary" name="status" value="approved">Approve Activity</button>
+      <button class="btn btn-danger" name="status" value="rejected">Reject Activity</button>
+      <a class="btn btn-secondary" href="{% url 'supervisor_dashboard' %}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

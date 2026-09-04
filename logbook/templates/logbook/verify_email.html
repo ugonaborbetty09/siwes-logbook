@@ -1,0 +1,136 @@
+{% extends "logbook/base.html" %}
+{% load static %}
+
+{% block title %}Verify Email - SIWES Logbook Manager{% endblock %}
+
+{% block extra_head %}
+<style>
+  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+  .auth-wrapper { flex: 1; }
+  .auth-container {
+    max-width: 420px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .otp-fields {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .otp-input {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    border-radius: 8px;
+    border: 2px solid var(--border-light);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    transition: all var(--transition);
+  }
+  .otp-input:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: var(--accent-glow);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="auth-wrapper">
+  <div class="auth-container">
+    <!-- Logo -->
+    <div style="text-align: center; margin-bottom: 32px;">
+      <div class="logo-icon" style="width: 48px; height: 48px; font-size: 24px; margin: 0 auto 12px;">✉️</div>
+      <h1 style="font-size: 1.4rem; margin-bottom: 6px;">Verify Your Email</h1>
+      <p class="text-muted">
+        {% if email %}
+          We sent a code to <strong>{{ email }}</strong>
+        {% else %}
+          Enter your email and verification code
+        {% endif %}
+      </p>
+    </div>
+
+    <!-- Auth Card -->
+    <div class="auth-card">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}" role="alert" style="margin-bottom: 16px;">
+            <span>{{ message }}</span>
+            <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post" class="auth-form">
+        {% csrf_token %}
+
+        <!-- Email Field (if not pre-filled from session) -->
+        {% if not email %}
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              placeholder="your@email.com" 
+              required
+              autocomplete="email"
+            >
+          </div>
+        {% else %}
+          <input type="hidden" name="email" value="{{ email }}">
+        {% endif %}
+
+        <!-- Verification Code -->
+        <div class="form-group">
+          <label for="code">6-Digit Verification Code</label>
+          <input 
+            type="text" 
+            id="code" 
+            name="code" 
+            placeholder="000000" 
+            maxlength="6" 
+            pattern="[0-9]{6}" 
+            required
+            autocomplete="off"
+            style="text-align: center; font-size: 1.2rem; letter-spacing: 0.1em; font-weight: 700; font-family: monospace;"
+          >
+          <p class="form-hint">Check your email for the 6-digit code</p>
+        </div>
+
+        <!-- Verify Button -->
+        <button type="submit" class="btn btn-primary btn-full btn-lg">
+          Verify Email
+        </button>
+      </form>
+
+      <!-- Resend Link -->
+      <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-light);">
+        <p class="text-sm" style="color: var(--text-muted); margin-bottom: 8px;">
+          Didn't receive the code?
+        </p>
+        <form method="post" action="{% url 'resend_verification' %}" style="display: inline;">
+          {% csrf_token %}
+          <input type="hidden" name="email" value="{{ email }}">
+          <button type="submit" class="btn btn-ghost" style="font-size: 0.9rem;">
+            Resend Code
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <p class="text-xs" style="color: var(--text-muted); text-align: center; margin-top: 24px;">
+      Verification code expires in 30 minutes
+    </p>
+  </div>
+</div>
+
+{% endblock %}

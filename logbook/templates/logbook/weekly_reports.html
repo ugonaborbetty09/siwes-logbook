@@ -1,0 +1,153 @@
+{% extends "logbook/base.html" %}
+{% load static %}
+
+{% block title %}Weekly Reports - SIWES Logbook Manager{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div class="flex-between">
+    <div>
+      <h1>📅 Weekly Reports</h1>
+      <p>View and manage your weekly SIWES reports</p>
+    </div>
+    <a href="{% url 'generate_pdf' %}" class="btn btn-primary">
+      📄 Download PDF Report
+    </a>
+  </div>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" role="alert" style="margin-bottom: 16px;">
+      <span>{{ message }}</span>
+      <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+{% if weeks %}
+  <div style="display: flex; flex-direction: column; gap: 24px;">
+    {% for week in weeks %}
+      <div class="card">
+        <!-- Week Header -->
+        <div class="card-header">
+          <div>
+            <h2 style="margin-bottom: 4px; font-size: 1.2rem;">
+              📆 Week {{ week.week_number }}
+            </h2>
+            <p class="text-sm text-muted">
+              {{ week.first_day|date:"M d" }} – {{ week.last_day|date:"M d, Y" }}
+              <span style="margin: 0 4px;">•</span>
+              {{ week.activity_count }} 
+              {% if week.activity_count == 1 %}
+                activity
+              {% else %}
+                activities
+              {% endif %}
+            </p>
+          </div>
+          <div>
+            <span class="badge badge-purple">{{ week.activity_count }} Items</span>
+          </div>
+        </div>
+
+        <!-- Activities List -->
+        <div style="margin-bottom: 24px;">
+          <h3 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--text-secondary);">Activities</h3>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            {% for activity in week.activities %}
+              <div style="padding: 12px; background: var(--bg-secondary); border-radius: var(--radius-md); border-left: 3px solid var(--accent);">
+                <div class="flex-between" style="margin-bottom: 6px;">
+                  <strong>{{ activity.date|date:"D, M d" }}</strong>
+                  <a href="{% url 'activity_detail' activity.pk %}" class="btn btn-ghost btn-sm">View</a>
+                </div>
+                <p class="text-sm" style="color: var(--text-secondary);">
+                  {{ activity.title|default:activity.activity|truncatewords:20 }}
+                </p>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Skills -->
+        {% if week.skills %}
+          <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 20px; padding: 16px; background: rgba(124, 58, 237, 0.1); border-radius: var(--radius-md); border-left: 3px solid var(--accent);">
+            <h3 style="font-size: 0.95rem; margin: 0 0 8px 0; color: var(--text-secondary);">🎓 Skills & Technologies</h3>
+            {% for skill in week.skills %}
+              <div style="padding: 8px; background: var(--bg-secondary); border-radius: var(--radius-sm);">
+                {{ skill|truncatewords:15 }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <!-- Challenges -->
+        {% if week.challenges %}
+          <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 20px; padding: 16px; background: rgba(245, 158, 11, 0.1); border-radius: var(--radius-md); border-left: 3px solid var(--warning);">
+            <h3 style="font-size: 0.95rem; margin: 0 0 8px 0; color: var(--text-secondary);">⚠️ Challenges</h3>
+            {% for challenge in week.challenges %}
+              <div style="padding: 8px; background: var(--bg-secondary); border-radius: var(--radius-sm);">
+                {{ challenge|truncatewords:15 }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <!-- What Learned -->
+        {% if week.what_learned %}
+          <div style="display: grid; grid-template-columns: 1fr; gap: 12px; padding: 16px; background: rgba(34, 197, 94, 0.1); border-radius: var(--radius-md); border-left: 3px solid var(--success);">
+            <h3 style="font-size: 0.95rem; margin: 0 0 8px 0; color: var(--text-secondary);">💡 Learnings</h3>
+            {% for learning in week.what_learned %}
+              <div style="padding: 8px; background: var(--bg-secondary); border-radius: var(--radius-sm);">
+                {{ learning|truncatewords:15 }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div style="display: flex; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-light);">
+          <button onclick="printWeek('week-{{ week.iso_week }}')" class="btn btn-secondary btn-sm">
+            🖨️ Print
+          </button>
+          <a href="{% url 'export_week' %}?year={{ week.iso_year }}&week={{ week.iso_week }}" class="btn btn-ghost btn-sm">
+            📥 Export
+          </a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Download PDF -->
+  <div class="card" style="margin-top: 28px; text-align: center;">
+    <p style="margin-bottom: 16px; color: var(--text-muted);">
+      Want to download all your reports as a professional PDF?
+    </p>
+    <a href="{% url 'generate_pdf' %}" class="btn btn-primary btn-lg">
+      📄 Download Complete Report
+    </a>
+  </div>
+{% else %}
+  <!-- Empty State -->
+  <div class="card" style="text-align: center; padding: 60px 30px;">
+    <p style="font-size: 3rem; margin-bottom: 12px;">📅</p>
+    <h3 style="margin-bottom: 8px;">No weekly reports yet</h3>
+    <p class="text-muted" style="margin-bottom: 24px;">
+      Start recording activities to generate weekly reports
+    </p>
+    <a href="{% url 'add_activity' %}" class="btn btn-primary">Add Your First Activity</a>
+  </div>
+{% endif %}
+
+<script>
+function printWeek(weekId) {
+  const element = document.getElementById(weekId);
+  if (element) {
+    window.print();
+  }
+}
+
+</script>
+
+{% endblock %}

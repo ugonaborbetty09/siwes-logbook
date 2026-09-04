@@ -1,0 +1,248 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIWES Logbook Manager - Manage Your SIWES Journey</title>
+  <meta name="description" content="A professional SIWES logbook management platform. Track your daily activities, generate reports, and collaborate with supervisors.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="{% static 'logbook/css/main.css' %}">
+  <style>
+    .landing-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: rgba(10,10,15,0.95);
+      border-bottom: 1px solid rgba(124,58,237,0.15);
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+    }
+    .landing-nav-content {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #f1f0ff;
+    }
+    .nav-logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #7c3aed, #5b21b6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #fff;
+      font-size: 18px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 12px;
+    }
+    body {
+      padding-top: 70px;
+    }
+    html { scroll-padding-top: 70px; }
+  </style>
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav class="landing-nav">
+  <div class="landing-nav-content">
+    <a href="{% url 'landing' %}" class="nav-logo">
+      <div class="nav-logo-icon">S</div>
+      <span>SIWES<span style="color: #7c3aed;">Logbook</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="{% url 'login' %}" class="btn btn-ghost">Log In</a>
+      <a href="{% url 'signup' %}" class="btn btn-primary">Get Started</a>
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Messages -->
+{% if messages %}
+  <div class="messages-public">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}" role="alert">
+        <span>{{ message }}</span>
+        <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Manage Your SIWES Journey in One Place</h1>
+    <p>Record daily activities, track your progress, work seamlessly with supervisors, and generate professional reports—all in one secure platform.</p>
+    <div class="hero-cta">
+      <a href="{% url 'signup' %}" class="btn btn-primary btn-lg">Get Started</a>
+      <a href="#features" class="btn btn-secondary btn-lg">Learn More ↓</a>
+    </div>
+  </div>
+  <div class="hero-illustration">
+    <div style="font-size: 80px; text-align: center;">📓</div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section" id="features">
+  <h2>Powerful Features for Your SIWES</h2>
+  <p>Everything you need to excel in your Industrial Training Programme</p>
+  
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">📝</div>
+      <h3>Daily Activity Tracking</h3>
+      <p>Record your daily SIWES activities with descriptions, skills learned, challenges encountered, and key learnings. Never forget what you accomplished.</p>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>Progress Tracking</h3>
+      <p>Visualize your SIWES progress with real-time statistics, week completion tracking, and automated calculations of days remaining.</p>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon">📋</div>
+      <h3>Weekly Reports</h3>
+      <p>Automatically group your activities by week. Generate comprehensive weekly reports with summaries, skills, and challenges.</p>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon">📅</div>
+      <h3>Monthly Reports</h3>
+      <p>Get a complete overview of your monthly activities. See trends, skills development, and overall progress at a glance.</p>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon">👥</div>
+      <h3>Supervisor Collaboration</h3>
+      <p>Work directly with your school and industry supervisors. Share reports, receive feedback, and track approval status in real-time.</p>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon">📄</div>
+      <h3>Professional PDF Reports</h3>
+      <p>Generate beautiful, ready-to-print PDF reports with your profile, supervisor information, activities, and approvals.</p>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <h3>Secure Accounts</h3>
+      <p>Email verification, secure password reset, and role-based access control ensure your data is always protected.</p>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon">🌙</div>
+      <h3>Dark & Light Mode</h3>
+      <p>Switch between beautiful dark and light themes. Your preference is saved and synced across all devices.</p>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="steps-section">
+  <h2>How It Works</h2>
+  
+  <div class="steps-grid">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Create an Account</h3>
+      <p>Sign up with your email and create a secure account in seconds. Verify your email to get started.</p>
+    </div>
+    
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Set Up Your Profile</h3>
+      <p>Add your SIWES information, institution details, and connect with your supervisors.</p>
+    </div>
+    
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Record Daily Activities</h3>
+      <p>Add activities as you complete them each day. Include descriptions, skills, challenges, and learnings.</p>
+    </div>
+    
+    <div class="step">
+      <div class="step-num">4</div>
+      <h3>Generate Reports</h3>
+      <p>Create weekly and monthly reports with one click. Export to PDF whenever you need.</p>
+    </div>
+    
+    <div class="step">
+      <div class="step-num">5</div>
+      <h3>Submit for Review</h3>
+      <p>Send reports to your supervisors for review and approval. Track their feedback and changes.</p>
+    </div>
+    
+    <div class="step">
+      <div class="step-num">6</div>
+      <h3>Track Progress</h3>
+      <p>Monitor approvals, view supervisor comments, and complete your SIWES with confidence.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+  <h2>Ready to Organize Your SIWES?</h2>
+  <p>Join hundreds of students and supervisors using SIWES Logbook Manager to streamline their Industrial Training Programme.</p>
+  <div style="display: flex; gap: 12px; justify-content: center;">
+    <a href="{% url 'signup' %}" class="btn btn-primary btn-lg">Create Account Now</a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="landing-footer">
+  <p>&copy; 2024 SIWES Logbook Manager. All rights reserved. | <a href="#" style="color: var(--accent);">Privacy Policy</a> | <a href="#" style="color: var(--accent);">Terms of Service</a></p>
+</footer>
+
+<!-- Theme Toggle Script -->
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  const currentTheme = html.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  
+  html.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  
+  const btn = document.getElementById('themeBtn');
+  btn.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+}
+
+// Load saved theme
+document.addEventListener('DOMContentLoaded', function() {
+  const saved = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.getElementById('themeBtn').textContent = saved === 'dark' ? '🌙' : '☀️';
+});
+</script>
+
+</body>
+</html>

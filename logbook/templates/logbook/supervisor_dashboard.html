@@ -1,0 +1,59 @@
+{% extends "logbook/base.html" %}
+
+{% block title %}Supervisor Dashboard - SIWES Logbook Manager{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Supervisor Dashboard</h1>
+  <p>Review assigned students and approve their submitted activities.</p>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-label">Assigned Students</div><div class="stat-value">{{ assigned_students }}</div></div>
+  <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-label">Awaiting Review</div><div class="stat-value">{{ pending_reviews }}</div></div>
+  <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-label">Approved Activities</div><div class="stat-value">{{ approved_activities }}</div></div>
+  <div class="stat-card"><div class="stat-icon">⚠️</div><div class="stat-label">Rejected Activities</div><div class="stat-value">{{ rejected_activities }}</div></div>
+</div>
+
+<div class="card" style="margin-top: 28px;">
+  <div class="card-header"><div class="card-title">My Students</div></div>
+  {% if students %}
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      {% for student in students %}
+        <a href="{% url 'supervisor_student_detail' student.pk %}" class="supervisor-row">
+          <div>
+            <strong>{{ student.get_full_name|default:student.email }}</strong>
+            <p class="text-sm text-muted">{{ student.email }}{% if student.profile.institution %} · {{ student.profile.institution }}{% endif %}</p>
+          </div>
+          <span class="status-badge status-approved">{{ student.profile.progress_percent }}% progress</span>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No students are assigned to you yet. An administrator must assign students from the Django admin.</p>
+  {% endif %}
+</div>
+
+<div class="card" id="reviews" style="margin-top: 28px;">
+  <div class="card-header"><div class="card-title">Recent Submissions</div></div>
+  {% if recent_activities %}
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      {% for activity in recent_activities %}
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; padding:14px; background:var(--bg-secondary); border-radius:var(--radius-md);">
+          <div>
+            <strong>{{ activity.title|default:activity.activity|truncatewords:12 }}</strong>
+            <p class="text-sm text-muted">{{ activity.user.get_full_name|default:activity.user.email }} · {{ activity.date|date:"M d, Y" }}</p>
+          </div>
+          {% if activity.status == 'pending' %}
+            <a href="{% url 'supervisor_review_activity' activity.pk %}" class="btn btn-primary btn-sm">Review</a>
+          {% else %}
+            <span class="status-badge status-{{ activity.status }}">{{ activity.get_status_display }}</span>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No activity submissions have been made by your assigned students.</p>
+  {% endif %}
+</div>
+{% endblock %}

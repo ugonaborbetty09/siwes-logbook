@@ -1,0 +1,50 @@
+{% extends "logbook/base.html" %}
+{% load static %}
+
+{% block title %}Delete Activity - SIWES Logbook Manager{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>🗑️ Delete Activity</h1>
+</div>
+
+<div style="max-width: 600px; margin: 0 auto;">
+  <div class="card" style="background: var(--error-bg); border-color: var(--error);">
+    <div style="text-align: center;">
+      <p style="font-size: 3rem; margin-bottom: 16px;">⚠️</p>
+      <h2 style="margin-bottom: 8px; color: var(--error);">Delete Activity?</h2>
+      <p class="text-muted" style="margin-bottom: 24px;">
+        Are you sure you want to permanently delete this activity? This action cannot be undone.
+      </p>
+
+      <div class="card" style="background: var(--bg-secondary); border-color: var(--border-light); text-align: left; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span class="text-muted">Date</span>
+          <strong>{{ activity.date|date:"M d, Y" }}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span class="text-muted">Title</span>
+          <strong>{{ activity.title|default:activity.activity|truncatewords:10 }}</strong>
+        </div>
+      </div>
+
+      <form method="post" style="display: flex; gap: 12px; justify-content: center;">
+        {% csrf_token %}
+        
+        <button type="submit" class="btn btn-danger btn-lg" onclick="return confirm('This cannot be undone. Are you absolutely sure?')">
+          🗑️ Yes, Delete Activity
+        </button>
+        <a href="{% url 'activity_detail' activity.pk %}" class="btn btn-secondary btn-lg">
+          Cancel
+        </a>
+      </form>
+    </div>
+  </div>
+
+  <p class="text-xs text-muted" style="text-align: center; margin-top: 20px;">
+    Once deleted, the activity will be permanently removed from your logbook.
+  </p>
+</div>
+
+{% endblock %}

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SIWES Logbook Manager{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Manage your SIWES activities, track your progress and generate professional reports.{% endblock %}">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'logbook/css/main.css' %}">
+  <link rel="icon" type="image/svg+xml" href="{% static 'logbook/images/siwes-favicon.svg' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+{% if user.is_authenticated %}
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon">S</div>
+        <span class="logo-text">SIWES<span class="logo-accent">Logbook</span></span>
+      </div>
+      <button class="sidebar-close" onclick="closeSidebar()" aria-label="Close sidebar">✕</button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+        <span class="nav-icon">⊞</span> Dashboard
+      </a>
+      {% if user.profile.role == 'supervisor' %}
+        <a href="{% url 'supervisor_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'supervisor_dashboard' %}active{% endif %}">
+          <span class="nav-icon">👥</span> My Students
+        </a>
+        <a href="{% url 'supervisor_dashboard' %}#reviews" class="nav-link">
+          <span class="nav-icon">✅</span> Activity Reviews
+        </a>
+      {% else %}
+      <a href="{% url 'activity_list' %}" class="nav-link {% if 'activity' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="nav-icon">📋</span> Activities
+      </a>
+      {% endif %}
+      <a href="{% url 'weekly_reports' %}" class="nav-link {% if request.resolver_match.url_name == 'weekly_reports' %}active{% endif %}">
+        <span class="nav-icon">📅</span> Weekly Reports
+      </a>
+      <a href="{% url 'monthly_reports' %}" class="nav-link {% if request.resolver_match.url_name == 'monthly_reports' %}active{% endif %}">
+        <span class="nav-icon">📊</span> Monthly Reports
+      </a>
+      <a href="{% url 'generate_pdf' %}" class="nav-link">
+        <span class="nav-icon">📄</span> Download PDF
+      </a>
+      <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+        <span class="nav-icon">👤</span> Profile
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="{% url 'logout' %}" class="nav-link nav-logout">
+        <span class="nav-icon">⎋</span> Logout
+      </a>
+    </div>
+  </aside>
+
+  <div class="app-layout">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="openSidebar()" aria-label="Open menu">☰</button>
+      <div class="topbar-brand">
+        <div class="logo-icon-sm">S</div>
+        <span class="topbar-title">SIWES Logbook</span>
+      </div>
+      <div class="topbar-right">
+        <button class="theme-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme" title="Toggle dark/light mode">🌙</button>
+        <div class="user-badge">
+          {% if user.profile.profile_picture %}
+            <img src="{{ user.profile.profile_picture.url }}" alt="Profile" class="avatar-img">
+          {% else %}
+            <div class="avatar-initials">{{ user.first_name|slice:":1"|upper }}{{ user.last_name|slice:":1"|upper }}</div>
+          {% endif %}
+          <span class="user-name">{{ user.get_full_name|default:user.email }}</span>
+        </div>
+      </div>
+    </header>
+  </div>
+{% else %}
+  <nav class="public-nav">
+    <div class="public-nav-inner">
+      <a href="{% url 'landing' %}" class="logo">
+        <div class="logo-icon">S</div>
+        <span class="logo-text">SIWES<span class="logo-accent">Logbook</span></span>
+      </a>
+      <div class="public-nav-links">
+        <button class="theme-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+        <a href="{% url 'login' %}" class="btn btn-ghost">Log In</a>
+        <a href="{% url 'signup' %}" class="btn btn-primary">Get Started</a>
+      </div>
+    </div>
+  </nav>
+{% endif %}
+
+{% if messages %}
+  <div class="messages-container {% if user.is_authenticated %}{% else %}messages-public{% endif %}">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}" role="alert">
+        <span>{{ message }}</span>
+        <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<main class="{% if user.is_authenticated %}page-content{% else %}public-content{% endif %}">
+  {% block content %}{% endblock %}
+</main>
+
+{% load static %}
+<script src="{% static 'logbook/js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

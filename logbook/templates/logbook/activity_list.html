@@ -1,0 +1,183 @@
+{% extends "logbook/base.html" %}
+{% load static %}
+
+{% block title %}Activities - SIWES Logbook Manager{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div class="flex-between">
+    <div>
+      <h1>Activities</h1>
+      <p>Manage your SIWES daily activities</p>
+    </div>
+    <a href="{% url 'add_activity' %}" class="btn btn-primary btn-lg">
+      <span>➕</span> New Activity
+    </a>
+  </div>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" role="alert" style="margin-bottom: 16px;">
+      <span>{{ message }}</span>
+      <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<!-- Search & Filter Bar -->
+<div class="card" style="margin-bottom: 28px;">
+  <form method="get" class="search-bar">
+    <div class="form-group">
+      <input 
+        type="text" 
+        name="q" 
+        placeholder="Search activities..." 
+        value="{{ q }}"
+        autocomplete="off"
+      >
+    </div>
+
+    <div class="form-group">
+      <input 
+        type="date" 
+        name="date_from" 
+        placeholder="From Date" 
+        value="{{ date_from }}"
+      >
+    </div>
+
+    <div class="form-group">
+      <input 
+        type="date" 
+        name="date_to" 
+        placeholder="To Date" 
+        value="{{ date_to }}"
+      >
+    </div>
+
+    <div class="form-group">
+      <input 
+        type="month" 
+        name="month" 
+        placeholder="Month" 
+        value="{{ month }}"
+      >
+    </div>
+
+    <div class="form-group">
+      <select name="status">
+        <option value="">All statuses</option>
+        <option value="pending" {% if status == 'pending' %}selected{% endif %}>Pending</option>
+        <option value="approved" {% if status == 'approved' %}selected{% endif %}>Approved</option>
+        <option value="rejected" {% if status == 'rejected' %}selected{% endif %}>Rejected</option>
+      </select>
+    </div>
+
+    <div style="display: flex; gap: 8px;">
+      <button type="submit" class="btn btn-primary">Search</button>
+      <a href="{% url 'activity_list' %}" class="btn btn-secondary">Clear</a>
+    </div>
+  </form>
+</div>
+
+<!-- Results -->
+{% if activities %}
+  <div class="activity-results">
+    {% for activity in activities %}
+      <div class="card activity-result-card">
+        <div class="activity-item">
+          <!-- Date -->
+          <div style="grid-column: 1; grid-row: 1 / 3;">
+            <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+              <span style="font-size: 2rem; font-weight: 800; color: var(--accent);">
+                {{ activity.date|date:"d" }}
+              </span>
+              <span class="text-sm text-muted">{{ activity.date|date:"M Y" }}</span>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div style="grid-column: 2; grid-row: 1;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px; flex-wrap:wrap;">
+              <h3 style="margin:0; font-size: 1.05rem;">
+                {{ activity.title|default:activity.activity|truncatewords:15 }}
+              </h3>
+              <span class="status-badge status-{{ activity.status|default:'pending' }}">{{ activity.get_status_display }}</span>
+            </div>
+            <p class="text-sm text-muted">{{ activity.activity|truncatewords:20 }}</p>
+          </div>
+
+          <!-- Actions -->
+          <div class="activity-actions" style="grid-column: 2; grid-row: 2; display: flex; gap: 8px; align-items: flex-end;">
+            <a href="{% url 'activity_detail' activity.pk %}" class="btn btn-secondary btn-sm">View</a>
+            <a href="{% url 'edit_activity' activity.pk %}" class="btn btn-ghost btn-sm">Edit</a>
+            <a href="{% url 'delete_activity' activity.pk %}" class="btn btn-danger btn-sm">Delete</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination Info -->
+  <div style="text-align: center; margin-top: 28px; padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-md);">
+    <p class="text-sm text-muted">
+      Showing <strong>{{ total }}</strong> 
+      {% if total == 1 %}
+        activity
+      {% else %}
+        activities
+      {% endif %}
+    </p>
+  </div>
+{% else %}
+  <!-- Empty State -->
+  <div class="card" style="text-align: center; padding: 60px 30px;">
+    <p style="font-size: 3rem; margin-bottom: 12px;">📝</p>
+    <h3 style="margin-bottom: 8px;">No activities found</h3>
+    <p class="text-muted" style="margin-bottom: 24px;">
+      {% if q or date_from or date_to or month %}
+        Try adjusting your search filters
+      {% else %}
+        Start by recording your first SIWES activity
+      {% endif %}
+    </p>
+    <a href="{% url 'add_activity' %}" class="btn btn-primary">Add Your First Activity</a>
+  </div>
+{% endif %}
+
+<style>
+  .activity-item {
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    gap: 16px;
+  }
+  .activity-actions {
+    justify-content: flex-end;
+  }
+  .status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .status-pending { background: #fff3cd; color: #856404; }
+  .status-approved { background: #d1e7dd; color: #0f5132; }
+  .status-rejected { background: #f8d7da; color: #842029; }
+
+  @media (max-width: 640px) {
+    .search-bar {
+      flex-direction: column !important;
+    }
+    .search-bar > div {
+      flex: 1 !important;
+      min-width: unset !important;
+    }
+  }
+</style>
+
+{% endblock %}

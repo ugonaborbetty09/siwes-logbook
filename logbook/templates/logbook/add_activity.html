@@ -1,0 +1,140 @@
+{% extends "logbook/base.html" %}
+{% load static %}
+
+{% block title %}Add Activity - SIWES Logbook Manager{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div class="flex-between">
+    <div>
+      <h1>📝 Add Daily Activity</h1>
+      <p>Record what you accomplished today</p>
+    </div>
+    <a href="{% url 'activity_list' %}" class="btn btn-ghost">← Back</a>
+  </div>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" role="alert" style="margin-bottom: 16px;">
+      <span>{{ message }}</span>
+      <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<div style="max-width: 800px;">
+  <div class="card">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <!-- Date -->
+        <div class="form-group">
+          <label for="date">Date</label>
+          <input 
+            type="date" 
+            id="date" 
+            name="date" 
+            required 
+            value="{{ post.date|default:'' }}"
+          >
+        </div>
+
+        <!-- Day -->
+        <div class="form-group">
+          <label for="day">Day (e.g., Monday)</label>
+          <input 
+            type="text" 
+            id="day" 
+            name="day" 
+            placeholder="e.g., Monday" 
+            value="{{ post.day|default:'' }}"
+          >
+        </div>
+      </div>
+
+      <!-- Title -->
+      <div class="form-group">
+        <label for="title">Activity Title (Optional)</label>
+        <input 
+          type="text" 
+          id="title" 
+          name="title" 
+          placeholder="Brief summary of today's work" 
+          value="{{ post.title|default:'' }}"
+        >
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="activity">Activity Description *</label>
+        <textarea 
+          id="activity" 
+          name="activity" 
+          placeholder="Describe what you did today, tasks completed, meetings attended, etc..." 
+          required
+          style="min-height: 140px;"
+        >{{ post.activity|default:'' }}</textarea>
+        <p class="form-hint">This is the main activity description. Be detailed and clear.</p>
+      </div>
+
+      <!-- Skills -->
+      <div class="form-group">
+        <label for="skills_learned">Skills & Technologies Used</label>
+        <textarea 
+          id="skills_learned" 
+          name="skills_learned" 
+          placeholder="List the skills you used or learned today..." 
+          style="min-height: 100px;"
+        >{{ post.skills_learned|default:'' }}</textarea>
+        <p class="form-hint">Examples: Python, JavaScript, Project Management, Communication, etc.</p>
+      </div>
+
+      <!-- Challenges -->
+      <div class="form-group">
+        <label for="challenges">Challenges Encountered</label>
+        <textarea 
+          id="challenges" 
+          name="challenges" 
+          placeholder="What challenges did you face and how did you overcome them?" 
+          style="min-height: 100px;"
+        >{{ post.challenges|default:'' }}</textarea>
+      </div>
+
+      <!-- What Learned -->
+      <div class="form-group">
+        <label for="what_learned">What I Learned</label>
+        <textarea 
+          id="what_learned" 
+          name="what_learned" 
+          placeholder="Key takeaways and learnings from today..." 
+          style="min-height: 100px;"
+        >{{ post.what_learned|default:'' }}</textarea>
+      </div>
+
+      <!-- Attachment -->
+      <div class="form-group">
+        <label for="attachment">Attachment (Image/PDF/Document)</label>
+        <input 
+          type="file" 
+          id="attachment" 
+          name="attachment" 
+          accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx"
+        >
+        <p class="form-hint">Allowed: JPG, PNG, GIF, PDF, DOC, DOCX (Max 10 MB)</p>
+      </div>
+
+      <!-- Submit -->
+      <div style="display: flex; gap: 12px; margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--border-light);">
+        <button type="submit" class="btn btn-primary btn-lg">
+          ✓ Save Activity
+        </button>
+        <a href="{% url 'activity_list' %}" class="btn btn-secondary btn-lg">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
