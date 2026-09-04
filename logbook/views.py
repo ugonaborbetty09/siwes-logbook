@@ -16,6 +16,7 @@ import os
 import secrets
 import string
 import csv
+import logging
 from collections import defaultdict
 from datetime import timedelta
 from functools import wraps
@@ -42,6 +43,8 @@ from .models import (
     IndustrySupervisor,
     EmailVerification,
 )
+
+logger = logging.getLogger(__name__)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -247,6 +250,7 @@ def signup(request):
         try:
             _send_verification_email(user, code)
         except Exception:
+            logger.exception("Verification email failed for %s", user.email)
             user.delete()
             messages.error(
                 request,
