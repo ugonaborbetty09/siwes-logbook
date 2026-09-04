@@ -169,6 +169,11 @@ DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL",
     f"SIWES Logbook Manager <{EMAIL_HOST_USER}>" if EMAIL_HOST_USER else "SIWES Logbook Manager <noreply@example.com>"
 )
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+RESEND_FROM_EMAIL = os.environ.get(
+    "RESEND_FROM_EMAIL",
+    DEFAULT_FROM_EMAIL,
+)
 
 if not EMAIL_HOST_USER and EMAIL_BACKEND == "django.core.mail.backends.smtp.EmailBackend":
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

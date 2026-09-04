@@ -17,6 +17,8 @@ import secrets
 import string
 import csv
 import logging
+import json
+from urllib import request as urlrequest
 from collections import defaultdict
 from datetime import timedelta
 from functools import wraps
@@ -55,6 +57,40 @@ def _generate_otp():
     return ''.join(secrets.choice(string.digits) for _ in range(6))
 
 
+def _send_email(subject, plain, html, recipient):
+    if settings.RESEND_API_KEY:
+        payload = json.dumps({
+            "from": settings.RESEND_FROM_EMAIL,
+            "to": [recipient],
+            "subject": subject,
+            "text": plain,
+            "html": html,
+        }).encode("utf-8")
+        api_request = urlrequest.Request(
+            "https://api.resend.com/emails",
+            data=payload,
+            headers={
+                "Authorization": f"Bearer {settings.RESEND_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        with urlrequest.urlopen(api_request, timeout=30) as response:
+            if response.status not in {200, 201}:
+                raise RuntimeError(f"Resend returned HTTP {response.status}.")
+        return
+
+    from django.core.mail import EmailMultiAlternatives
+    email = EmailMultiAlternatives(
+        subject,
+        plain,
+        settings.DEFAULT_FROM_EMAIL,
+        [recipient],
+    )
+    email.attach_alternative(html, "text/html")
+    email.send(fail_silently=False)
+
+
 def _send_verification_email(user, code):
     subject = "Verify your SIWES Logbook account"
     plain = (
@@ -81,15 +117,7 @@ def _send_verification_email(user, code):
       </body>
     </html>
     """
-    from django.core.mail import EmailMultiAlternatives
-    email = EmailMultiAlternatives(
-        subject,
-        plain,
-        settings.DEFAULT_FROM_EMAIL,
-        [user.email],
-    )
-    email.attach_alternative(html, "text/html")
-    email.send(fail_silently=False)
+    _send_email(subject, plain, html, user.email)
 
 
 def _send_reset_email(user, code):
@@ -117,15 +145,7 @@ def _send_reset_email(user, code):
       </body>
     </html>
     """
-    from django.core.mail import EmailMultiAlternatives
-    email = EmailMultiAlternatives(
-        subject,
-        plain,
-        settings.DEFAULT_FROM_EMAIL,
-        [user.email],
-    )
-    email.attach_alternative(html, "text/html")
-    email.send(fail_silently=False)
+    _send_email(subject, plain, html, user.email)
 
 
 def _ensure_profiles(user):
