@@ -661,6 +661,7 @@ def _render_dashboard(request, role):
 @login_required
 @never_cache
 def dashboard(request):
+    _ensure_profiles(request.user)
     profile = request.user.profile
     if profile.role == UserProfile.ROLE_SUPERVISOR:
         return redirect('supervisor_dashboard')
